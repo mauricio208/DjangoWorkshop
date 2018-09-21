@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css"></script>
+</head>
+<body>
+    <h1>Django Worksop, Add a node to begin</h1>
+    <div id='graph'  style="width: 500px;height: 500px;border: gray; border-style: solid">
+    </div>
+    <div>
+        <form action="{% url 'graphmaker:add-node' %}" style="border: gray; border-style: dotted" method="POST" id="add-node">
+            {% csrf_token %}
+
+            Add Node (Parent Id is optional)<br>
+            Data:<input type="text" name="label" id="label" required>
+            Parent Id:<input type="text" name="parent" id="parent">
+            <button>Add</button>
+        </form>
+        <form action="{% url 'graphmaker:move-node' %}" style="border: gray; border-style: dotted" method="POST" id="move-node">
+            {% csrf_token %}
+
+            Move Node <br>
+            Node Id:<input type="text" name="child" id="child" required>
+            New Parent Id:<input type="text" name="parent" id="parent" required>
+            <button>Move</button>
+        </form>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+
+<script>
+    function reDraw(data){
+        var nodes = new vis.DataSet(data.nodes);
+
+        // create an array with edges
+        var edges = new vis.DataSet(data.edges);
+
+        // create a network
+        var container = document.getElementById('graph');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {};
+        var network = new vis.Network(container, data, options);
+    }
+
+    function postToServer(form){
+        $.post( form.attr('action'),form.serialize(), function( data ) {
+            console.log(data);
+            reDraw(data);
+        });
+    }
+    
+    $('#add-node').submit(function(e){
+        e.preventDefault();
+        postToServer($(this))
+    })
+
+    $('#move-node').submit(function(e){
+        e.preventDefault();
+        postToServer($(this))
+    })
+</script>
+</html>
